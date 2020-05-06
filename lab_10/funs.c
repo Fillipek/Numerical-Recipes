@@ -3,32 +3,39 @@
 #include <stdio.h>
 #include <math.h>
 
-double findFunMin(double xa, double xb, double epsilon, double (*f)(double), const char *filename)
+double findFunMin(double xa, double xb, double epsilon, double (*f)(double), const char *filename, double cmpVal)
 {
+    FILE *out = fopen(filename,"w");
     const double r = (sqrt(5) - 1.) / 2.;
     const double lambda1 = r * r, lambda2 = r;
     double x1, x2;
-    ;
+    int i = 1;
+
+    fprintf(out, "it. num\t\tcur. est\tdiff\n");
+
     do
     {
         x1 = xa + lambda1 * (xb - xa);
         x2 = xa + lambda2 * (xb - xa);
+
+        fprintf(out, "%7d\t\t%lf\t%lf\n", i, fabs(x2 - x1), fabs(x2 - x1) - cmpVal);
+
         if (f(x2) > f(x1))
         {
             xb = x2;
-            printf("zmiana xb = %f\n", xb);
         }
         else
         {
             xa = x1;
-            printf("zmiana xa = %f\n", xa);
         }
+        i++;
     } while (fabs(x2 - x1) >= epsilon);
 
+    fclose(out);
     return (x1 + x2) / 2.;
 }
 
-double f1(double x)
+double f(double x)
 {
     return log(pow(x, 5) + 3 * pow(x, 2) + x + 9);
 }
