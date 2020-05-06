@@ -1,2 +1,2 @@
-program: main.c
-	gcc -o program main.c -lm
+program: main.c funs.c
+	gcc -o program main.c funs.c -lm
