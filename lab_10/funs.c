@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-double findFunMin(double xa, double xb, double epsilon, double (*f)(double), const char *filename, double cmpVal)
+double findFunMinGolden(double xa, double xb, double epsilon, double (*f)(double), const char *filename, double cmpVal)
 {
     FILE *out = fopen(filename,"w");
     const double r = (sqrt(5) - 1.) / 2.;
@@ -35,7 +35,42 @@ double findFunMin(double xa, double xb, double epsilon, double (*f)(double), con
     return (x1 + x2) / 2.;
 }
 
+double findFunMinTriple(double xa, double xb, double epsilon, double (*f)(double), const char *filename, double cmpVal) 
+{
+    FILE *out = fopen(filename, "w");
+    double x1, x2;
+    int i = 1;
+
+    fprintf(out, "it. num\t\tcur. est\tdiff\n");
+
+    do
+    {
+        x1 = xa + (xb - xa)/3.;
+        x2 = xa + (xb - xa)/3. * 2;
+
+        fprintf(out, "%7d\t\t%lf\t%lf\n", i, fabs(x2 - x1), fabs(x2 - x1) - cmpVal);
+        
+        if(f(x2) > f(x1)) 
+        {
+            xb = x2;
+        }
+        else
+        {
+            xa = x1;
+        }
+        i++;
+    } while (fabs(x2-x1) >= epsilon);
+
+    fclose(out);
+    return (x1 + x2) / 2.;
+}
+
 double f(double x)
 {
     return log(pow(x, 5) + 3 * pow(x, 2) + x + 9);
+}
+
+double g(double x) 
+{
+    return pow(x,6);
 }
