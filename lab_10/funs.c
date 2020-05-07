@@ -18,7 +18,7 @@ double findFunMinGolden(double xa, double xb, double epsilon, double (*f)(double
         x1 = xa + lambda1 * (xb - xa);
         x2 = xa + lambda2 * (xb - xa);
 
-        fprintf(out, "%7d\t\t%lf\t%lf\n", i, (xa + xb) / 2., (xa + xb) / 2. - cmpVal);
+        fprintf(out, "%7d\t\t%lf\t%lf\n", i, (xa + xb) / 2., fabs((xa + xb) / 2. - cmpVal));
         
         if (f(x2) > f(x1))
         {
@@ -48,7 +48,7 @@ double findFunMinTriple(double xa, double xb, double epsilon, double (*f)(double
         x1 = xa + (xb - xa)/3.;
         x2 = xa + (xb - xa) / 3. * 2;
 
-        fprintf(out, "%7d\t\t%lf\t%lf\n", i, (xa + xb) / 2., (xa + xb) / 2. - cmpVal);
+        fprintf(out, "%7d\t\t%lf\t%lf\n", i, (xa + xb) / 2., fabs((xa + xb) / 2. - cmpVal));
 
         if(f(x2) > f(x1)) 
         {
