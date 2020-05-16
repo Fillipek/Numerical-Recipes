@@ -4,6 +4,18 @@
 #include <gsl/gsl_fft_complex.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+void create_directory(const char* name)
+{
+    struct stat st = {0};
+    if (stat(name, &st) == -1) {
+        mkdir(name, 0700);
+    }
+}
 
 double noise()
 {
@@ -33,26 +45,36 @@ void generate_signal(double* y, size_t size)
 
 void save_to_file(double *y, size_t size, const char* filename)
 {
-    FILE *f = fopen(filename,"w");
+    create_directory("data");
+    char *path = malloc(strlen("data")+strlen(filename)+2);
+    strcpy(path,"data/");
+    strcat(path,filename);
+    FILE *f = fopen(path,"w");
 
     for(size_t i=0; i<size; i++)
     {
-        fprintf(f,"%d\t%lf\n",i,y[i]);
+        fprintf(f,"%lu\t%lf\n",i,y[i]);
     }
 
     fclose(f);
+    free(path);
 }
 
 void save_complex_to_file(double *y, size_t size, const char* filename)
 {
-    FILE *f = fopen(filename,"w");
+    create_directory("data");
+    char *path = malloc(strlen("data")+strlen(filename)+2);
+    strcpy(path,"data/");
+    strcat(path,filename);
+    FILE *f = fopen(path,"w");
 
-    for(size_t i=0; i<size; i+=2)
+    for(size_t i=0; i<size; i++)
     {
-        fprintf(f,"%d\t%lf\t%lf\n",i,y[i],y[i+1]);
+        fprintf(f,"%lu\t%lf\t%lf\n",i,y[2*i],y[2*i+1]);
     }
 
     fclose(f);
+    free(path);
 }
 
 double* alloc_complex_vector(double* y, size_t size)
@@ -93,26 +115,80 @@ void discriminate_complex(double *complex, size_t size, double threshold)
 
 int main(void)
 {
-    size_t k = 8;
-    size_t N = pow(2, k);
-    double *y = malloc(N*sizeof(double));
-    double *fourier = alloc_complex_vector(y, N);
+    {
+        size_t k = 8;
+        size_t N = pow(2, k);
+        double *y = malloc(N*sizeof(double));
 
-	generate_signal(y,N);
-    save_to_file(y, N, "raw_signal.dat");
+	    generate_signal(y,N);
+        save_to_file(y, N, "8_raw_signal.dat");
 
-    gsl_fft_complex_radix2_forward(fourier, 1, N);
-    save_complex_to_file(fourier, 2*N, "fft_signal.dat");
+        double *fourier = alloc_complex_vector(y, N);
 
-    calc_modules(y, N, fourier);
-    save_to_file(y, N, "fft_modules.dat");
+        gsl_fft_complex_radix2_forward(fourier, 1, N);
+        save_complex_to_file(fourier, N, "8_fft_signal.dat");
 
-    discriminate_complex(fourier, 2*N, max(y, N) / 2. );
+        calc_modules(y, N, fourier);
+        save_to_file(y, N, "8_fft_modules.dat");
 
-    gsl_fft_complex_radix2_backward(fourier, 1, N);
-    save_complex_to_file(fourier, 2*N, "filtered_signal.dat");
+        discriminate_complex(fourier, 2*N, max(y, N) / 2. );
+
+        gsl_fft_complex_radix2_backward(fourier, 1, N);
+        save_complex_to_file(fourier, N, "8_filtered_signal.dat");
     
-    free(fourier);
-    free(y);
+        free(fourier);
+        free(y);
+    }
+    
+    {
+        size_t k = 10;
+        size_t N = pow(2, k);
+        double *y = malloc(N*sizeof(double));
+
+	    generate_signal(y,N);
+        save_to_file(y, N, "10_raw_signal.dat");
+
+        double *fourier = alloc_complex_vector(y, N);
+
+        gsl_fft_complex_radix2_forward(fourier, 1, N);
+        save_complex_to_file(fourier, N, "10_fft_signal.dat");
+
+        calc_modules(y, N, fourier);
+        save_to_file(y, N, "10_fft_modules.dat");
+
+        discriminate_complex(fourier, 2*N, max(y, N) / 2. );
+
+        gsl_fft_complex_radix2_backward(fourier, 1, N);
+        save_complex_to_file(fourier, N, "10_filtered_signal.dat");
+    
+        free(fourier);
+        free(y);
+    }
+
+    {
+        size_t k = 12;
+        size_t N = pow(2, k);
+        double *y = malloc(N*sizeof(double));
+
+	    generate_signal(y,N);
+        save_to_file(y, N, "12_raw_signal.dat");
+
+        double *fourier = alloc_complex_vector(y, N);
+
+        gsl_fft_complex_radix2_forward(fourier, 1, N);
+        save_complex_to_file(fourier, N, "12_fft_signal.dat");
+
+        calc_modules(y, N, fourier);
+        save_to_file(y, N, "12_fft_modules.dat");
+
+        discriminate_complex(fourier, 2*N, max(y, N) / 2. );
+
+        gsl_fft_complex_radix2_backward(fourier, 1, N);
+        save_complex_to_file(fourier, N, "12_filtered_signal.dat");
+    
+        free(fourier);
+        free(y);
+    }
+
     return 0;
 }
