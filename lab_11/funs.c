@@ -42,7 +42,17 @@ void generate_signal(double* y, size_t size)
     }
 }
 
-void save_to_file(double *y, size_t size, const char* filename)
+void generate_pure_signal(double* y, size_t size)
+{
+    double omega = 4*M_PI / size;
+
+    for(size_t i=0; i<size; i++)
+    {
+        y[i] = sin(omega*i) + sin(2*omega*i) + sin(3*omega*i);
+    }
+}
+
+void save_to_file(double *y, size_t size, const char* filename, double threshold)
 {
     create_directory("data");
     char *path = malloc(strlen("data")+strlen(filename)+2);
@@ -50,16 +60,26 @@ void save_to_file(double *y, size_t size, const char* filename)
     strcat(path,filename);
     FILE *f = fopen(path,"w");
 
-    for(size_t i=0; i<size; i++)
+    if(threshold==0)
     {
-        fprintf(f,"%lu\t%lf\n",i,y[i]);
+        for(size_t i=0; i<size; i++)
+        {
+            fprintf(f,"%lu\t%lf\n",i,y[i]);
+        }
+    }
+    else
+    {
+        for(size_t i=0; i<size; i++)
+        {
+            fprintf(f,"%lu\t%lf\t%lf\n",i,y[i],threshold);
+        }
     }
 
     fclose(f);
     free(path);
 }
 
-void save_complex_to_file(double *y, size_t size, const char* filename)
+void save_complex_to_file(double *y, size_t size, const char* filename, double threshold)
 {
     create_directory("data");
     char *path = malloc(strlen("data")+strlen(filename)+2);
@@ -67,9 +87,19 @@ void save_complex_to_file(double *y, size_t size, const char* filename)
     strcat(path,filename);
     FILE *f = fopen(path,"w");
 
-    for(size_t i=0; i<size; i++)
+    if(threshold==0)
     {
-        fprintf(f,"%lu\t%lf\t%lf\n",i,y[2*i],y[2*i+1]);
+        for(size_t i=0; i<size; i++)
+        {
+            fprintf(f,"%lu\t%lf\t%lf\n",i,y[2*i],y[2*i+1]);
+        }
+    }
+    else
+    {
+        for(size_t i=0; i<size; i++)
+        {
+            fprintf(f,"%lu\t%lf\t%lf\t%lf\n",i,y[2*i],y[2*i+1],threshold);
+        }
     }
 
     fclose(f);
@@ -103,11 +133,19 @@ void discriminate_complex(double *complex, size_t size, double threshold)
     calc_modules(mods, size/2, complex);
     for(size_t i=0; i<size/2; i++)
     {
-        if (mods[i]<threshold) 
+        if (mods[i]<threshold)
         {
-            complex[2*i] =0; 
+            complex[2*i] =0;
             complex[2*i+1] = 0;
         }
     }
     free(mods);
+}
+
+void normalize(double* y,size_t size, double factor)
+{
+    for(size_t i=0; i<size; i++)
+    {
+      y[i] /= factor;
+    }
 }
