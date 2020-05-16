@@ -3,7 +3,7 @@ charts: program data
 	gnuplot plot.p
 
 program: main.c
-	gcc main.c -o program -lm -lgsl -lgslcblas -Wall
+	gcc main.c funs.c -o program -lm -lgsl -lgslcblas -Wall
 
 data: program
 	./program
